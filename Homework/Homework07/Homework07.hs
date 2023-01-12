@@ -62,4 +62,5 @@ https://wiki.haskell.org/FAQ#What.27s_the_difference_between_Integer_and_Int.3F
 
 Another interesting topic:
 https://serokell.io/blog/haskell-typeclasses
+
 --}
