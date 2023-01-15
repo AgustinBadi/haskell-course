@@ -53,3 +53,15 @@ still need to make another choice.
 
 6. Adapt adapt "solveMaze" function to use "showCurrentChoice" and play with your new game using GHCi! :D
 -}
+
+import Data.List ((\\))
+
+data Move = GoForward | GoLeft | GoRight deriving (Show, Eq, Ord)
+type Maze = [Move]
+
+solveMaze ::  Maze -> [Move] -> String 
+solveMaze maze [] = "You're still inside the maze. Choose a path, brave adventurer: GoLeft, GoRight, or GoForward."
+solveMaze (x:xs) (y:ys)
+ | (x:xs) == (y:ys) = "YOU'VE FOUND THE EXIT!!"
+ | x /= y = "You've hit a wall!"
+ | x == y && (length (xs \\ ys) >= 1 ) = solveMaze xs ys 

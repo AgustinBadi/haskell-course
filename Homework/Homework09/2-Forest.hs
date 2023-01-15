@@ -42,3 +42,20 @@ Using GHCi, like the "Maze" game, this game should look like this:
 *Main> solveForest testForest [GoForward, GoLeft , GoRight]
 "YOU'VE FOUND THE EXIT!!"
 -}
+
+data Move = GoForward | GoLeft | GoRight deriving (Eq, Ord, Show)
+type Forest = (Move,Int)
+type Stamina = Int
+
+solveForest :: [Forest] -> [Move] -> Stamina -> String
+solveForest _ _ sta
+ | sta <= 0 = "You ran out of stamina and died -.-!"
+solveForest maze [] sta = "You have " ++ show sta ++" stamina, and you're still inside the Forest. Choose a path, brave adventurer: GoLeft, GoRight, or GoForward."
+solveForest (x:xs) (y:ys) sta 
+ | (map (fst) (x:xs)) == (y:ys) = "YOU'VE FOUND THE EXIT!!"
+ | otherwise = solveForest xs ys (sta - (snd x))
+
+
+
+
+
