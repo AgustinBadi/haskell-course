@@ -2,6 +2,7 @@ import Data.List
 import System.CPUTime (getCPUTime)
 import System.Directory (doesFileExist, listDirectory)
 import Text.XHtml (thead)
+import System.Environment (getArgs)
 
 {-
 We imported some functions that you'll need to complete the homework.
@@ -19,7 +20,10 @@ Define an IO action that counts the number of files in the current directory
 and prints it to the terminal inside a string message.
 -}
 
--- listFiles :: IO ()
+listFiles :: IO ()
+listFiles = do
+    files <- listDirectory "./"
+    print $ length files
 
 {-
 -- Question 2 --
@@ -28,7 +32,16 @@ to a file called msg.txt, and after that, it reads the text from the msg.txt
 file and prints it back. Use the writeFile and readFile functions.
 -}
 
--- createMsg :: IO ()
+--writeFile :: FilePath -> String -> IO ()
+--readFile :: FilePath -> IO String
+
+createMsg :: IO ()
+createMsg = do
+    putStrLn "Type something..."
+    msg <- getLine
+    writeFile "./msg.txt" msg 
+    readMsg <- readFile "./msg.txt"
+    putStrLn readMsg
 
 
 {-
@@ -70,8 +83,14 @@ Use the getCPUTime :: IO Integer function to get the CPU time before and after t
 The CPU time here is given in picoseconds (which is 1/1000000000000th of a second).
 -}
 
--- timeIO :: IO a -> IO ()
-
+timeIO :: IO a -> IO Integer
+timeIO action = do
+    start <- getCPUTime
+    action 
+    finish <- getCPUTime
+    let timeToExecute = finish - start
+    putStrLn $ "Time: " ++ show timeToExecute ++ " picoseconds\n" 
+    return timeToExecute
 
 {-
 -- Question 4 --
@@ -80,7 +99,22 @@ and compares the time all three algorithms take to produce the largest prime bef
 limit. Print the number and time to the standard output.
 -}
 
--- benchmark :: IO ()
+benchmark :: IO ()
+benchmark = do
+
+    putStrLn "Given this many prime numbers (type a number): \n"
+    limit <- getLine
+
+    putStrLn "The first algorithm takes:"
+    time1 <- timeIO $ return $ primes1 $ (read limit :: Integer) 
+
+    putStrLn "The second algorithm takes:"
+    time2 <- timeIO $ return $ primes2 $ (read limit :: Integer) 
+
+    putStrLn "The third algorithm takes:"
+    time3 <- timeIO $ return $ primes3 $ (read limit :: Integer) 
+
+    return ()
 
 {-
  -- Question 5 -- EXTRA CREDITS -- (In case the previous ones were too easy)
@@ -102,3 +136,38 @@ Below you can see an example output of how such a structure looks like:
 HINT: You can use the function doesFileExist, which takes in a FilePath and returns
 True if the argument file exists and is not a directory, and False otherwise.
 -}
+
+
+tree [] level path = return ""
+tree [z] level path = do
+    v <- doesFileExist $ path ++ z 
+    let result = (concat $ take level (repeat "    ")) ++ "└── " ++ z ++ "\n"
+    if v then return result 
+    else do 
+        subfolder <- listDirectory (path ++ z)
+        sublevel <- tree subfolder (succ level) (path ++ z ++ "/")
+        return (result ++ sublevel ) 
+tree (d:directory) level path = do 
+    v <- doesFileExist $ path ++ d 
+    let result = (concat $ take level (repeat "    ")) ++ "├── " ++ d ++ "\n"
+    if v then do
+        next <- tree directory level path
+        return (result ++ next)
+    else do 
+        subfolder <- listDirectory (path ++ d) 
+        sublevel <- tree subfolder (succ level) (path ++ d ++ "/")
+        next <- tree directory level path
+        return (result ++ sublevel ++ next)
+
+
+main = do 
+    args <- getArgs
+    let direction = if args == [] then "./" else head args
+    ls <- listDirectory direction
+    print ls
+    result <- tree ls 0 direction
+    putStrLn result
+
+
+
+
